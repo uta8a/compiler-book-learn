@@ -5,4 +5,6 @@ bash -x test.sh # debug
 
 # Learn
 - tokenize -> skip space, add information to token
-
+# todo
+- step3 syntax learn, understand
+- error awesome, dig to learn

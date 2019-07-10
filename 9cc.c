@@ -26,9 +26,16 @@ Token *token;
 
 // error report function
 // like printf
-void error(char *fmt, ...) {
+char *user_input;
+
+void error_at(char *loc, char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
+
+	int pos = loc - user_input;
+	fprintf(stderr, "%s\n", user_input);
+	fprintf(stderr, "%*s", pos, ""); // pos white space
+	fprintf(stderr, "^ ");
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);
@@ -45,7 +52,7 @@ bool consume(char op) {
 
 void expect(char op) {
 	if (token->kind != TK_RESERVED || token->str[0] != op)
-		error("'%c' is unexpected", op);
+		error_at(token->str, "'%c' is unexpected", op);
 	token = token->next;
 }
 
@@ -53,7 +60,7 @@ void expect(char op) {
 // report error
 int expect_number() {
 	if (token->kind != TK_NUM)
-		error("Not a number");
+		error_at(token->str, "Not a number");
 	int val = token->val;
 	token = token->next;
 	return val;
@@ -95,7 +102,7 @@ Token *tokenize(char *p) {
 			continue;
 		}
 
-		error("can't tokenize");
+		error_at(token->str, "can't tokenize");
 	}
 
 	new_token(TK_EOF, cur, p);
@@ -110,6 +117,7 @@ int main(int argc, char **argv) {
 
 	// tokenize
 	token = tokenize(argv[1]);
+	user_input = argv[1];
 
 	// assembly front part
 	printf(".intel_syntax noprefix\n");
