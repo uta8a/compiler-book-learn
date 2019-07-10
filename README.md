@@ -1,4 +1,8 @@
 bash -x test.sh # debug
 
 # NEXT
-- step2
+- step3
+
+# Learn
+- tokenize -> skip space, add information to token
+
