@@ -1,13 +1,13 @@
 bash -x test.sh # debug
-
 # NEXT
 - step3
 
 # Learn
 - tokenize -> skip space, add information to token
+
 # todo
-- step3 syntax learn, understand
-- error awesome, dig to learn
+- node visualize
+- error
 
 # note
 
@@ -20,4 +20,4 @@ mul        = unary ("*" unary | "/" unary)*
 unary      = ("+" | "-")? term
 term       = num | "(" expr ")"
 ```
-
+- tokenize -> result is token -> build node using token when consume
