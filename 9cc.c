@@ -191,6 +191,9 @@ void gen(Node *node) {
 	case ND_ADD:
 		printf("  add rax, rdi\n");
 		break;
+	case ND_SUB:
+		printf("  sub rax, rdi\n");
+		break;
 	}
 	printf("  push rax\n");
 }
