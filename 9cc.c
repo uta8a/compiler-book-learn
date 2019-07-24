@@ -114,7 +114,7 @@ Token *tokenize(char *p) {
 			continue;
 		}
 
-		if (*p == '+' || *p == '-') {
+		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
 			cur = new_token(TK_RESERVED, cur, p++);
 			continue;
 		}
@@ -163,7 +163,14 @@ Node *expr() {
 Node *mul() {
 	Node *node = term();
 
-	return node;
+	for(;;) {
+		if (consume('*'))
+			node = new_node(ND_MUL, node, term());
+		else if (consume('/'))
+			node = new_node(ND_DIV, node, term());
+		else
+			return node;
+	}
 }
 Node *term() {
 	if (consume('(')) {
@@ -194,6 +201,12 @@ void gen(Node *node) {
 	case ND_SUB:
 		printf("  sub rax, rdi\n");
 		break;
+	case ND_MUL:
+		printf("  imul rax, rdi\n");
+		break;
+	case ND_DIV:
+		printf("  cqo\n");
+		printf("  idiv rdi\n");
 	}
 	printf("  push rax\n");
 }
