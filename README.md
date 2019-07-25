@@ -10,7 +10,9 @@ bash -x test.sh # debug
 - error
 
 # note
+- len is NUM->-1, EOF->-2
 
+# misc
 ```
 expr       = equality
 equality   = relational ("==" relational | "!=" relational)*
@@ -22,3 +24,5 @@ term       = num | "(" expr ")"
 ```
 - tokenize -> result is token -> build node using token when consume
 - token is consumed by expr() 
+- `new_token` = `add_token`
+- token length depends on like 111111, or == or +, so it's decided when you parse it. so tokenize is decide len part. 

@@ -99,20 +99,21 @@ void debug_show(Token *cur) {
 	Token *target = cur;
 	for(;;){
 		if (target == NULL)break;
+		printf("kind %d 0==NUM, 1==other\n", target->kind != TK_NUM);
 		printf("str is %c\n", *target->str);
 		printf("val is %d\n", target->val);
 		printf("length is %d\n", target->len);
+		printf("-----------------\n");
 		target = target->next;
 	}
 }
 
-
-Token *new_token(TokenKind kind, Token *cur, char *str) {
+Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
 	Token *tok = calloc(1, sizeof(Token));
 	tok->kind = kind;
 	tok->str = str;
+	tok->len = len;
 	cur->next = tok;
-	cur->len = strlen(str);
 	return tok;
 }
 
@@ -130,12 +131,12 @@ Token *tokenize(char *p) {
 		}
 
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
-			cur = new_token(TK_RESERVED, cur, p++);
+			cur = new_token(TK_RESERVED, cur, p++, 1);
 			continue;
 		}
 
 		if (isdigit(*p)) {
-			cur = new_token(TK_NUM, cur, p);
+			cur = new_token(TK_NUM, cur, p, -1/* ? */);
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
@@ -143,7 +144,7 @@ Token *tokenize(char *p) {
 		error_at(token->str, "can't tokenize");
 	}
 
-	new_token(TK_EOF, cur, p);
+	new_token(TK_EOF, cur, p, -2);
 	return head.next;
 }
 
