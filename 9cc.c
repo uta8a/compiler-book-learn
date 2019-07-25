@@ -9,7 +9,7 @@
 typedef enum {
 	TK_RESERVED, // symbol
 	TK_EQ, // ==
-	TK_NQ, // !=
+	TK_NE, // !=
 	TK_LE, // <=
 	TK_GE, // >=
 	TK_NUM,		 // number token
@@ -37,6 +37,8 @@ typedef enum {
 	ND_MUL, // *
 	ND_DIV, // /
 	ND_NUM, // number
+	ND_EQ, // ==
+	ND_NE, //!=
 } NodeKind;
 
 typedef struct Node Node;
@@ -76,7 +78,9 @@ void error_at(char *loc, char *fmt, ...) {
 // if next token is ok symbol, progress one token and return true
 // otherwise false
 bool consume(char *op) {
-	if (token->kind != TK_RESERVED ||
+	if ((token->kind != TK_RESERVED &&
+		token->kind != TK_EQ &&
+		token->kind != TK_NE) ||
 		strlen(op) != token->len ||
 		memcmp(token->str, op, token->len))
 		return false;
@@ -149,6 +153,11 @@ Token *tokenize(char *p) {
 			p+=2;
 			continue;
 		}
+		if (strncmp(p, "!=", 2) == 0) {
+			cur = new_token(TK_NE, cur, p, 2);
+			p+=2;
+			continue;
+		}
 		// if ()//wip
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
 			cur = new_token(TK_RESERVED, cur, p++, 1);
@@ -185,20 +194,19 @@ Node *new_node_num(int val) {
 
 Node *expr() {
 	Node *node = equality();
-	
-	for(;;) {
-		if (consume("+"))
-			node =  new_node(ND_ADD, node, mul());
-		else if (consume("-"))
-			node = new_node(ND_SUB, node, mul());
-		else
-			return node;
-	}
 }
 
 Node *equality() {
 	Node *node = relational();
-	return node;
+
+	for(;;) {
+		if (consume("=="))
+			node = new_node(ND_EQ, node, relational());
+		else if (consume("!="))
+			node = new_node(ND_NE, node, relational());
+		else
+			return node;
+	}
 }
 
 Node *relational() {
@@ -274,6 +282,17 @@ void gen(Node *node) {
 	case ND_DIV:
 		printf("  cqo\n");
 		printf("  idiv rdi\n");
+		break;
+	case ND_EQ:
+		printf("  cmp rax, rdi\n");
+		printf("  sete al\n");
+		printf("  movzb rax, al\n");
+		break;
+	case ND_NE:
+		printf("  cmp rax, rdi\n");
+		printf("  setne al\n");
+		printf("  movzb rax, al\n");
+		break;
 	}
 	printf("  push rax\n");
 }
