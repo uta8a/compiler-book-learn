@@ -5,6 +5,7 @@ bash -x test.sh # debug
 # Learn
 - tokenize -> skip space, add information to token
 - single quote, double quote https://stackoverflow.com/questions/3683602/single-quotes-vs-double-quotes-in-c-or-c
+- strtol(p, &p, 10) -> &p is other not number string, so next step working.
 # todo
 - node visualize
 - error

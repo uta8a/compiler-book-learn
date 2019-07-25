@@ -49,9 +49,12 @@ struct Node {
 };
 
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
 Node *mul();
-Node *term();
 Node *unary();
+Node *term();
 
 // error report function
 // like printf
@@ -109,7 +112,7 @@ void debug_show(Token *cur) {
 	for(;;){
 		if (target == NULL)break;
 		printf("kind %d 0==NUM, 1==other\n", target->kind != TK_NUM);
-		printf("str is %c\n", *target->str);
+		printf("str is %s\n", target->str);
 		printf("val is %d\n", target->val);
 		printf("length is %d\n", target->len);
 		printf("-----------------\n");
@@ -141,6 +144,11 @@ Token *tokenize(char *p) {
 			continue;
 		}
 
+		if (strncmp(p, "==", 2) == 0) {
+			cur = new_token(TK_EQ, cur, p, 2);
+			p+=2;
+			continue;
+		}
 		// if ()//wip
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
 			cur = new_token(TK_RESERVED, cur, p++, 1);
@@ -176,8 +184,30 @@ Node *new_node_num(int val) {
 }
 
 Node *expr() {
-	Node *node = mul();
+	Node *node = equality();
 	
+	for(;;) {
+		if (consume("+"))
+			node =  new_node(ND_ADD, node, mul());
+		else if (consume("-"))
+			node = new_node(ND_SUB, node, mul());
+		else
+			return node;
+	}
+}
+
+Node *equality() {
+	Node *node = relational();
+	return node;
+}
+
+Node *relational() {
+	Node *node = add();
+	return node;
+}
+
+Node *add() {
+	Node *node = mul();
 	for(;;) {
 		if (consume("+"))
 			node =  new_node(ND_ADD, node, mul());
@@ -259,8 +289,8 @@ int main(int argc, char **argv) {
 	token = tokenize(user_input);
 	
 	// DEBUG_BEGIN
-	debug_show(token);
-	printf("----------------------\n");
+	//debug_show(token);
+	//printf("----------------------\n");
 	// DEBUG_END
 	
 	Node *node = expr();
