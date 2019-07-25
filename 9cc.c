@@ -8,7 +8,11 @@
 // ----------token------------
 typedef enum {
 	TK_RESERVED, // symbol
-	TK_NUM,		 // number token 
+	TK_EQ, // ==
+	TK_NQ, // !=
+	TK_LE, // <=
+	TK_GE, // >=
+	TK_NUM,		 // number token
 	TK_EOF,		 // end of input token
 } TokenKind;
 
@@ -68,15 +72,19 @@ void error_at(char *loc, char *fmt, ...) {
 
 // if next token is ok symbol, progress one token and return true
 // otherwise false
-bool consume(char op) {
-	if (token->kind != TK_RESERVED || token->str[0] != op)
+bool consume(char *op) {
+	if (token->kind != TK_RESERVED ||
+		strlen(op) != token->len ||
+		memcmp(token->str, op, token->len))
 		return false;
 	token = token->next;
 	return true;
 }
 
-void expect(char op) {
-	if (token->kind != TK_RESERVED || token->str[0] != op)
+void expect(char *op) {
+	if (token->kind != TK_RESERVED ||
+		strlen(op) != token->len ||
+		memcmp(token->str, op, token->len))
 		error_at(token->str, "'%c' is unexpected", op);
 	token = token->next;
 }
@@ -95,6 +103,7 @@ bool at_eof() {
 	return token->kind ==TK_EOF;
 }
 
+// --------------debug_util----------------
 void debug_show(Token *cur) {
 	Token *target = cur;
 	for(;;){
@@ -107,6 +116,8 @@ void debug_show(Token *cur) {
 		target = target->next;
 	}
 }
+
+// -------------token-----------------------
 
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
 	Token *tok = calloc(1, sizeof(Token));
@@ -130,13 +141,14 @@ Token *tokenize(char *p) {
 			continue;
 		}
 
-		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
+		// if ()//wip
+		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
 			cur = new_token(TK_RESERVED, cur, p++, 1);
 			continue;
 		}
 
 		if (isdigit(*p)) {
-			cur = new_token(TK_NUM, cur, p, -1/* ? */);
+			cur = new_token(TK_NUM, cur, p, -1/* wrong? */);
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
@@ -144,7 +156,7 @@ Token *tokenize(char *p) {
 		error_at(token->str, "can't tokenize");
 	}
 
-	new_token(TK_EOF, cur, p, -2);
+	new_token(TK_EOF, cur, p, -2 /* wrong? */);
 	return head.next;
 }
 
@@ -167,9 +179,9 @@ Node *expr() {
 	Node *node = mul();
 	
 	for(;;) {
-		if (consume('+'))
+		if (consume("+"))
 			node =  new_node(ND_ADD, node, mul());
-		else if (consume('-'))
+		else if (consume("-"))
 			node = new_node(ND_SUB, node, mul());
 		else
 			return node;
@@ -180,9 +192,9 @@ Node *mul() {
 	Node *node = unary();
 
 	for(;;) {
-		if (consume('*'))
+		if (consume("*"))
 			node = new_node(ND_MUL, node, unary());
-		else if (consume('/'))
+		else if (consume("/"))
 			node = new_node(ND_DIV, node, unary());
 		else
 			return node;
@@ -190,17 +202,17 @@ Node *mul() {
 }
 
 Node *unary() {
-	if (consume('+'))
+	if (consume("+"))
 		return term();
-	if (consume('-'))
+	if (consume("-"))
 		return new_node(ND_SUB, new_node_num(0), term());
 	return term();
 }
 
 Node *term() {
-	if (consume('(')) {
+	if (consume("(")) {
 		Node *node = expr();
-		expect(')');
+		expect(")");
 		return node;
 	}
 

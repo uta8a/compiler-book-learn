@@ -4,7 +4,7 @@ bash -x test.sh # debug
 
 # Learn
 - tokenize -> skip space, add information to token
-
+- single quote, double quote https://stackoverflow.com/questions/3683602/single-quotes-vs-double-quotes-in-c-or-c
 # todo
 - node visualize
 - error
