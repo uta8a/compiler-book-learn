@@ -89,7 +89,9 @@ bool consume(char *op) {
 }
 
 void expect(char *op) {
-	if (token->kind != TK_RESERVED ||
+	if ((token->kind != TK_RESERVED &&
+		token->kind != TK_EQ &&
+		token->kind != TK_NE) ||
 		strlen(op) != token->len ||
 		memcmp(token->str, op, token->len))
 		error_at(token->str, "'%c' is unexpected", op);
