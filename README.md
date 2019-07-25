@@ -21,3 +21,4 @@ unary      = ("+" | "-")? term
 term       = num | "(" expr ")"
 ```
 - tokenize -> result is token -> build node using token when consume
+- token is consumed by expr() 

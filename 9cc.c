@@ -20,6 +20,7 @@ struct Token {
 	Token *next;
 	int val;
 	char *str;
+	int len;
 };
 
 // now focused token
@@ -94,11 +95,24 @@ bool at_eof() {
 	return token->kind ==TK_EOF;
 }
 
+void debug_show(Token *cur) {
+	Token *target = cur;
+	for(;;){
+		if (target == NULL)break;
+		printf("str is %c\n", *target->str);
+		printf("val is %d\n", target->val);
+		printf("length is %d\n", target->len);
+		target = target->next;
+	}
+}
+
+
 Token *new_token(TokenKind kind, Token *cur, char *str) {
 	Token *tok = calloc(1, sizeof(Token));
 	tok->kind = kind;
 	tok->str = str;
 	cur->next = tok;
+	cur->len = strlen(str);
 	return tok;
 }
 
@@ -230,8 +244,13 @@ int main(int argc, char **argv) {
 	// tokenize
 	user_input = argv[1];
 	token = tokenize(user_input);
+	
+	// DEBUG_BEGIN
+	debug_show(token);
+	printf("----------------------\n");
+	// DEBUG_END
+	
 	Node *node = expr();
-
 	// assembly front part
 	printf(".intel_syntax noprefix\n");
 	printf(".global main\n");
