@@ -39,6 +39,10 @@ typedef enum {
 	ND_NUM, // number
 	ND_EQ, // ==
 	ND_NE, //!=
+	ND_LT, // <
+	ND_GT, // >
+	ND_LE, // <=
+	ND_GE, // >=
 } NodeKind;
 
 typedef struct Node Node;
@@ -80,7 +84,9 @@ void error_at(char *loc, char *fmt, ...) {
 bool consume(char *op) {
 	if ((token->kind != TK_RESERVED &&
 		token->kind != TK_EQ &&
-		token->kind != TK_NE) ||
+		token->kind != TK_NE &&
+		token->kind != TK_LE &&
+		token->kind != TK_GE) ||
 		strlen(op) != token->len ||
 		memcmp(token->str, op, token->len))
 		return false;
@@ -91,7 +97,9 @@ bool consume(char *op) {
 void expect(char *op) {
 	if ((token->kind != TK_RESERVED &&
 		token->kind != TK_EQ &&
-		token->kind != TK_NE) ||
+		token->kind != TK_NE &&
+		token->kind != TK_LE &&
+		token->kind != TK_GE) ||
 		strlen(op) != token->len ||
 		memcmp(token->str, op, token->len))
 		error_at(token->str, "'%c' is unexpected", op);
@@ -160,7 +168,17 @@ Token *tokenize(char *p) {
 			p+=2;
 			continue;
 		}
-		// if ()//wip
+		if (strncmp(p, "<=", 2) == 0) {
+			cur = new_token(TK_LE, cur, p, 2);
+			p+=2;
+			continue;
+		}
+		if (strncmp(p, ">=", 2) == 0) {
+			cur = new_token(TK_GE, cur, p, 2);
+			p+=2;
+			continue;
+		}
+
 		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
 			cur = new_token(TK_RESERVED, cur, p++, 1);
 			continue;
@@ -213,7 +231,18 @@ Node *equality() {
 
 Node *relational() {
 	Node *node = add();
-	return node;
+	for (;;) {
+		if (consume("<"))
+			node = new_node(ND_LT, node, add());
+		else if (consume("<="))
+			node = new_node(ND_LE, node, add());
+		else if (consume(">"))
+			node = new_node(ND_LT, add(), node);
+		else if (consume(">="))
+			node = new_node(ND_LE, add(), node);
+		else
+			return node;
+	}
 }
 
 Node *add() {
@@ -294,6 +323,22 @@ void gen(Node *node) {
 		printf("  cmp rax, rdi\n");
 		printf("  setne al\n");
 		printf("  movzb rax, al\n");
+		break;
+	case ND_LT:
+		printf("  cmp rax, rdi\n");
+		printf("  setl al\n");
+		printf("  movzb rax, al\n");	
+		break;
+	case ND_LE:
+		printf("  cmp rax, rdi\n");
+		printf("  setle al\n");
+		printf("  movzb rax, al\n");
+		break;
+	case ND_GT:
+		fprintf(stderr, "ND_GT `>` still exists\n");
+		break;
+	case ND_GE:
+		fprintf(stderr, "ND_GE `>=` still exists\n");
 		break;
 	}
 	printf("  push rax\n");
