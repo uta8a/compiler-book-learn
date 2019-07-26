@@ -9,7 +9,7 @@ bash -x test.sh # debug
 # todo
 - node visualize
 - error
-
+- Makefile change for split files
 # note
 - len is NUM->-1, EOF->-2
 
