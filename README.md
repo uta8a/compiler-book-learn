@@ -27,3 +27,10 @@ term       = num | "(" expr ")"
 - token is consumed by expr() 
 - `new_token` = `add_token`
 - token length depends on like 111111, or == or +, so it's decided when you parse it. so tokenize is decide len part. 
+- split file
+	- main: assembly
+	- 9cc.h: util&declaration
+	- parse: Node
+	- codegen: to asm
+	- container: misc
+- 
