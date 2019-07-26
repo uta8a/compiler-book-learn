@@ -1,15 +1,14 @@
-bash -x test.sh # debug
-# NEXT
-- step3
+# **C Compiler**
 
+bash -x test.sh # debug
 # Learn
 - tokenize -> skip space, add information to token
 - single quote, double quote https://stackoverflow.com/questions/3683602/single-quotes-vs-double-quotes-in-c-or-c
 - strtol(p, &p, 10) -> &p is other not number string, so next step working.
+- usage Vim: yank https://www.softel.co.jp/blogs/tech/archives/2664
 # todo
 - node visualize
 - error
-- Makefile change for split files
 # note
 - len is NUM->-1, EOF->-2
 
