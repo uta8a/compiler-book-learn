@@ -9,6 +9,7 @@ bash -x test.sh # debug
 # todo
 - node visualize
 - error
+- variable, function
 # note
 - len is NUM->-1, EOF->-2
 
